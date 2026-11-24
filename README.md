@@ -12,13 +12,18 @@ A reusable, team-maintained framework for building projects and custom agents co
 .
 ├── AGENTS.md                                      # Rules for agents working inside this framework repo
 ├── ANTIGRAVITY_ECOSYSTEM_GUIDE.md                 # Full guide to App, IDE, CLI, and agent features
+├── TOKEN_EFFICIENCY_GUIDE.md                      # $50/mo playbook: model tiering, skills, subagents
 ├── CONTRIBUTING.md                                # How team members add/improve skills, rules, and plugins
 ├── .agents/
 │   └── plugins/
 │       └── supost-framework/                      # Shareable Antigravity plugin (auto-discovered here)
 │           ├── plugin.json
-│           ├── rules/AGENTS.md                    # Shared team engineering & agent rules
+│           ├── rules/AGENTS.md                    # Shared team engineering & token-efficiency rules
 │           └── skills/
+│               ├── codebase-explorer/SKILL.md     # Skill: fast read-only search & file mapping
+│               ├── frontend-dev/SKILL.md          # Skill: token-efficient frontend development
+│               ├── backend-dev/SKILL.md           # Skill: token-efficient backend development
+│               ├── token-efficient-agents/SKILL.md# Skill: model tiering & subagent delegation
 │               ├── project-bootstrap/SKILL.md     # Skill: bootstrap any repo with this framework
 │               └── framework-contribute/SKILL.md  # Skill: add/update framework skills, rules, hooks
 └── template/                                      # Copy-paste starter kit for new projects
