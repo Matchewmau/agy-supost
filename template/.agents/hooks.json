@@ -1,0 +1,17 @@
+{
+  "post-edit-lint": {
+    "enabled": false,
+    "PostToolUse": [
+      {
+        "matcher": "edit_file",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "echo Replace with your project lint command",
+            "timeout": 15
+          }
+        ]
+      }
+    ]
+  }
+}
