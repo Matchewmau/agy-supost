@@ -1,39 +1,39 @@
-# Token & Cost Efficiency Guide ($50/Month Playbook)
+# Quality-First Token & Cost Guide ($50/Month Playbook)
 
-Practical rules for running Antigravity App, IDE, and CLI (`agy`) with subagents on a strict **$50/month** budget.
-
----
-
-## 1. Tier Your Models by Role
-When invoking subagents (`invoke_subagent`) or choosing a model in the App/IDE:
-- **Coordinator / Architect (`inherit` / Medium)**: Plans the task, decomposes work, and reviews final diffs.
-- **Explorer / Researcher (`flash_lite` or `flash`)**: Searches files, greps symbols, and returns a short summary with exact file paths and line numbers—so the main agent doesn't burn context reading 15 files itself.
-- **Frontend & Backend Builders (`flash`)**: Handles routine components, endpoints, migrations, and unit tests. Escalate to `pro` only for complex architecture or hard bugs.
-- **Skip `/boost` and large swarms** for routine tasks—they multiply turns and parallel token spend.
+Practical guidelines for staying within a **$50/month** budget **without sacrificing code integrity, architecture quality, or test coverage**. Fixing buggy output from an underpowered model costs more tokens than doing it right the first time.
 
 ---
 
-## 2. Use Skills (Progressive Disclosure) Instead of Big `AGENTS.md` Files
-`AGENTS.md` is injected on **every turn** (up to the 20,000-token aggregate rules budget). Keep project `AGENTS.md` files under ~50–80 lines (stack, build/test commands, hard constraints).
+## 1. Match Model & Effort to Task Risk (Quality First)
+Use the full range of available models (e.g., **Neon**, **Carbon**, **Argon**, **Hydrogen**, `pro`, `flash`) and tune **reasoning effort** to match the complexity and risk of the work:
 
-Put domain workflows into **Skills**—only their `name` and `description` sit in context until triggered. This repo includes four ready-to-use skills in `.agents/plugins/supost-framework/skills/`:
-- [`codebase-explorer`](./.agents/plugins/supost-framework/skills/codebase-explorer/SKILL.md) — Fast, read-only search & mapping.
-- [`frontend-dev`](./.agents/plugins/supost-framework/skills/frontend-dev/SKILL.md) — Scoped UI, styling, state, and targeted frontend tests.
-- [`backend-dev`](./.agents/plugins/supost-framework/skills/backend-dev/SKILL.md) — Scoped APIs, DB/schemas, auth, and targeted backend tests.
-- [`token-efficient-agents`](./.agents/plugins/supost-framework/skills/token-efficient-agents/SKILL.md) — How the coordinator defines and delegates to `flash`/`flash_lite` subagents.
+| Work Type | Recommended Model & Effort | Why |
+| :--- | :--- | :--- |
+| **Architecture, Security, DB Migrations, Hard Bugs** | High-capability (`pro`, Neon/Carbon/Argon) at **High** effort | Minimizes subtle bugs, security flaws, and costly rework loops |
+| **Feature Implementation (Frontend & Backend)** | Balanced (`inherit` / Hydrogen / Carbon) at **Medium** effort | Strong code quality and conventions at reasonable cost |
+| **Codebase Search & File Mapping** | Fast (`flash` / `flash_lite`) at **Low** effort | Read-only exploration doesn't need heavy reasoning |
+| **Routine Boilerplate & Formatting** | Fast (`flash`) at **Low–Medium** effort | Low-risk edits with clear patterns |
+
+> **Rule of Thumb**: Never force a weak model onto complex logic, auth, state management, or data-integrity code. Escalate model/effort whenever errors or ambiguity appear.
+
+---
+
+## 2. Save Tokens Through Clean Context (Not Weak Models)
+- **Keep `AGENTS.md` lean**: Always-on rules load on every turn (20,000-token aggregate budget). Keep `AGENTS.md` under ~50–80 lines.
+- **Use Skills (`.agents/skills/`)**: Progressive disclosure keeps domain instructions (`frontend-dev`, `backend-dev`, `codebase-explorer`, `token-efficient-agents`) out of context until needed.
+- **One task = one fresh conversation**: Every turn re-sends the full history. Start a new chat per feature/bug, or use `/compact` on long threads.
+- **Use IDE Tab & `Ctrl+I` for small edits**: Autocomplete and inline commands avoid full multi-turn agent overhead for localized changes.
 
 ---
 
 ## 3. Isolate Context with Focused Subagents (`define_subagent`)
-Each subagent runs in its own conversation, so intermediate file reads and failed test logs **never bloat the parent agent's context window**:
-1. **Explorer Subagent** (`flash_lite` / `flash`, `EnableWriteTools: false`): Uses `codebase-explorer` and returns only file paths, line ranges, and key symbols.
-2. **Frontend Subagent** (`flash`, `EnableWriteTools: true`): Uses `frontend-dev`, edits only UI files, and returns modified paths + test results.
-3. **Backend Subagent** (`flash`, `EnableWriteTools: true`): Uses `backend-dev`, edits only server/DB files, and returns modified endpoints/schemas + test results.
+Subagents run in their own context window, preventing intermediate file reads and test logs from bloating the main session:
+1. **Explorer Subagent** (`flash` / `flash_lite`, `EnableWriteTools: false`): Uses `codebase-explorer` to return exact file paths, line ranges, and key symbols.
+2. **Frontend Subagent** (`inherit` or `pro` for complex state/UI, `EnableWriteTools: true`): Uses `frontend-dev`, edits UI files, and runs targeted UI checks + build.
+3. **Backend Subagent** (`inherit` or `pro` for API/DB/auth, `EnableWriteTools: true`): Uses `backend-dev`, edits server/DB files, and runs targeted backend tests.
 
 ---
 
-## 4. Daily Token-Saving Habits
-- **Use IDE Tab & `Ctrl+I` for small edits**: Autocomplete and inline commands cost a fraction of a multi-turn Agent Mode loop.
-- **One task = one fresh conversation**: Every turn re-sends the entire history. Start a new chat per feature/bug, or run `/compact` when a thread gets long.
-- **Run targeted tests**: Run the specific test file (e.g., `pytest tests/test_auth.py`) while iterating, and run the full suite once at the end.
-- **Batch reads & edits**: Ask the agent to read/edit related files in parallel rather than one file per turn.
+## 4. Verification Keeps Errors (and Rework) Minimal
+- Run targeted tests while iterating (`pytest tests/test_auth.py`), then run the full relevant lint/typecheck/test suite before finishing.
+- Review diffs carefully—catching a bug in one verification pass is far cheaper than debugging it across 10 follow-up turns.
