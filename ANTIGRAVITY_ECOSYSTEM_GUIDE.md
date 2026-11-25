@@ -62,10 +62,14 @@ Type `/` in the chat canvas to trigger specialized workflows:
 - `/compact` — Summarize and free up context in long sessions.
 - `/learn` — Persist corrections or complex setups so future sessions follow them.
 
-### Multi-Agent & Workflow Patterns
-- **Subagents (`invoke_subagent` / `define_subagent`)**: Delegate focused tasks (e.g., codebase research, isolated test debugging). Supports workspace modes: `inherit` (same workspace), `branch` (isolated clone), or `share` (shared repo, separate working copy).
-- **Swarms**: Spawn named workers on a shared board for parallel implementation across independent modules or files.
-- **Dynamic Python Workflows (`run_workflow`)**: Orchestrate `parallel`, `pipeline`, and `phase` agent fan-outs in Python when a task splits cleanly across many files, modules, or review angles.
+### Multi-Agent & Orchestration Options
+Pick the simplest built-in mechanism that fits the shape of the work:
+- **Built-in `Orchestrator` Model (`agy --model "Orchestrator (Neon)"` or `/model`)**: Best for **single-thread tasks**. A strong planner (Neon by default, or Carbon / Argon / Opus 5.5 on Pro/Ultra; Carbon + Hydrogen on Enterprise) directs a faster executor (Hydrogen / Sonnet 5.5) automatically in one conversation with zero setup.
+- **Custom Subagents (`.agents/agents/<name>.md` + `invoke_subagent`)**: Best for **2–4 parallel slices** or isolated scouting/verification. Subagents accept `model` (`inherit`, `flash`, or `pro`) and `workspace` (`inherit`, `share` for separate working copy, or `branch` for isolated clone). Pair with the `neon-orchestrator` skill for greenfield setup (`PLAN.md` / `TASKS.md`), workspace isolation, independent diff/test verification (`verifier`), and Git checkpoints.
+- **Dynamic Python Workflows (`run_workflow`)**: Best for **fan-outs >4 items** or staged pipelines (`parallel`, `pipeline`, `phase`) where every agent (`flash_lite`, `flash`, `pro`, `inherit`) returns a JSON-schema-validated result.
+- **Swarms (`/swarm`)**: User-invoked shared message board with named workers and dedicated verifiers for broad parallel tasks (available on all plans).
+- **Teamwork (`/teamwork`)**: Multi-milestone, long-horizon autonomous teams with scoping interviews, persistent project directories, and critic/auditor gates (paid plans).
+- **Boost (`/boost`)**: Multi-round deep reasoning and adversarial verification when a problem is hard rather than broad (paid plans).
 
 ### Safety, Permissions & Sandboxing
 Configure these globally or per-project in **Antigravity App → Settings**:
@@ -83,6 +87,7 @@ Antigravity discovers customizations automatically from your project (`.agents/`
 | Feature | Location | Purpose |
 | :--- | :--- | :--- |
 | **Rules** | `AGENTS.md`, `GEMINI.md`, `.agents/rules/*.md` | Always-on coding standards, architecture constraints, and repo conventions. (Capped at 24,000 bytes/file; 20,000-token aggregate rules budget.) |
+| **Custom Agents** | `.agents/agents/<name>.md` | Saved specialist subagents (`explorer`, `frontend-builder`, `backend-builder`, `verifier`) with explicit `tools`, `model` (`inherit`/`flash`/`pro`), `skills`, and `commandExecutionPolicy`. Discovered in App, IDE, and `agy` (`/agents`). |
 | **Skills** | `.agents/skills/<name>/SKILL.md` | On-demand runbooks loaded via **progressive disclosure** (only `name` & `description` are in context until triggered). Can include `scripts/`, `references/`, `examples/`, and `resources/`. |
 | **Plugins** | `.agents/plugins/<name>/plugin.json` | Shareable bundles packaging `skills/`, `rules/AGENTS.md`, `hooks.json`, and `mcp_config.json` into one unit. |
 | **Lifecycle Hooks** | `.agents/hooks.json` | Run shell commands on `SessionStart`, `PreToolUse`, `PostToolUse`, `PreInvocation`, `PostInvocation`, and `Stop` (e.g., auto-linting, formatting, safety gates). |
@@ -115,21 +120,25 @@ You can also stream `response.thoughts` and `response.tool_calls`, or use `run_i
 
 ---
 
-## 5. Recommended Blueprint for `D:\agy-supost`
+## 5. Recommended Workspace Blueprint
 
-When you are ready to turn `D:\agy-supost` into a full project workspace, organize customizations like this so the **App**, **IDE**, and **CLI** all behave consistently:
+Organize project workspaces like this so the **App**, **IDE**, and **CLI** all discover rules, custom agents, and skills identically:
 
 ```text
-D:\agy-supost\
-├── AGENTS.md                         # Project overview, conventions, build/test commands
-└── .agents\
-    ├── skills\
-    │   └── <workflow-name>\
+<project-root>/
+├── AGENTS.md                         # Project overview, conventions, verified build/test commands
+├── PLAN.md                           # Architecture & milestones (for greenfield / multi-session builds)
+├── TASKS.md                          # Slice checklist & Git checkpoints across sessions
+└── .agents/
+    ├── agents/                       # Saved custom subagents (explorer, frontend-builder, backend-builder, verifier)
+    ├── rules/
+    │   └── AGENTS.md                 # Shared team engineering & verification rules
+    ├── skills/
+    │   └── <workflow-name>/
     │       ├── SKILL.md              # Step-by-step runbook (YAML frontmatter: name, description)
-    │       ├── scripts\              # Helper scripts for the agent to run
-    │       └── references\           # Detailed docs loaded only when needed
-    ├── hooks.json                    # Optional: PreToolUse / PostToolUse linters or safety checks
-    └── plugins\                      # Optional: Team-shareable bundles
+    │       ├── scripts/              # Helper scripts for the agent to run
+    │       └── references/           # Detailed docs loaded only when needed
+    └── hooks.json                    # Optional: PreToolUse / PostToolUse linters or safety checks
 ```
 
 ### Official Documentation Index

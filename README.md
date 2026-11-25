@@ -1,8 +1,8 @@
 # SUpost Antigravity Team Framework
 
-A reusable, team-maintained framework for building projects and custom agents consistently across **Antigravity App (2.0)**, **Antigravity IDE**, and **Antigravity CLI (`agy`)**.
+A reusable, team-maintained framework of **custom subagents**, **skills**, **shared rules**, and **project templates** that works consistently across **Antigravity App (2.0)**, **Antigravity IDE**, and **Antigravity CLI (`agy`)**.
 
-> New to Antigravity? Start with [ANTIGRAVITY_ECOSYSTEM_GUIDE.md](./ANTIGRAVITY_ECOSYSTEM_GUIDE.md) for how the App, IDE, CLI, and Python SDK work together.
+> New to Antigravity? Start with [ANTIGRAVITY_ECOSYSTEM_GUIDE.md](./ANTIGRAVITY_ECOSYSTEM_GUIDE.md) for how the App, IDE, CLI, built-in Orchestrator model, custom subagents, and workflows fit together.
 
 ---
 
@@ -10,17 +10,16 @@ A reusable, team-maintained framework for building projects and custom agents co
 
 | If you want to... | Read this |
 | :--- | :--- |
-| **Learn how Antigravity works** (App, IDE, CLI, skills, rules, subagents) | [ANTIGRAVITY_ECOSYSTEM_GUIDE.md](./ANTIGRAVITY_ECOSYSTEM_GUIDE.md) |
-| **Stay on budget without losing code quality** (model/effort tiering, clean context) | [TOKEN_EFFICIENCY_GUIDE.md](./TOKEN_EFFICIENCY_GUIDE.md) |
-| **Run Neon as a lead orchestrator** dispatching lower-tier, skill-loaded subagents | [neon-orchestrator/SKILL.md](./.agents/skills/neon-orchestrator/SKILL.md) |
-| **Add or improve team skills, rules, or templates** | [CONTRIBUTING.md](./CONTRIBUTING.md) |
+| **Learn how Antigravity works** (App, IDE, CLI, Orchestrator model, `/swarm`, `/teamwork`) | [ANTIGRAVITY_ECOSYSTEM_GUIDE.md](./ANTIGRAVITY_ECOSYSTEM_GUIDE.md) |
+| **Stay on budget without losing code quality** (model selection, context hygiene, `PLAN.md`/`TASKS.md`) | [TOKEN_EFFICIENCY_GUIDE.md](./TOKEN_EFFICIENCY_GUIDE.md) |
+| **Coordinate greenfield builds or parallel slices** (saved agents, isolated workspaces, real verification) | [neon-orchestrator/SKILL.md](./.agents/skills/neon-orchestrator/SKILL.md) |
+| **Add or improve custom agents, skills, rules, or templates** | [CONTRIBUTING.md](./CONTRIBUTING.md) |
 
-### Daily Team Workflow
-1. **Install once globally (optional)**: Copy `.agents/rules/` and `.agents/skills/` into `~/.gemini/config/` so every project gets your team rules and skills automatically.
-2. **Bootstrap new projects**: Copy `.agents/` and `template/AGENTS.md` into the project root (or prompt *"Use `project-bootstrap` to set up `<path>`"*) and fill in `<project>/AGENTS.md` with stack and build/test commands.
-3. **Run tasks with Neon Orchestrator**: Start a fresh chat per task on **Neon** and prompt *"Use the `neon-orchestrator` skill to implement `<feature>`"* — Neon will scout with `flash_lite`, delegate edits to lower-tier skill-loaded subagents, and verify the final result.
-4. **Keep context clean**: One task = one fresh conversation (or use `/compact` on long threads).
-5. **Contribute improvements back**: Open this repo and prompt *"Use `framework-contribute` to add/update `<skill or rule>`"*.
+### Choosing How to Run Work
+- **Single-thread feature or bug fix**: Select the built-in **`Orchestrator` model** (`agy --model "Orchestrator (Neon)"` or `/model`) so Neon plans/reviews and Hydrogen executes automatically, and let the agent load `frontend-dev` / `backend-dev` skills.
+- **Starting a brand-new project from scratch**: Run `/grill-me` or `/plan`, then prompt *"Use `neon-orchestrator` and `project-bootstrap` to initialize this project"* — sets up `PLAN.md`, `TASKS.md`, verified `AGENTS.md` commands, and an initial skeleton commit before parallel slices begin.
+- **2–4 parallel feature slices**: Prompt *"Use `neon-orchestrator` to implement `<feature>`"* — scouts with `explorer` (`flash`), dispatches `frontend-builder` / `backend-builder` in isolated workspaces (`share` / `branch`), audits real `git diff` + tests with `verifier`, and creates Git checkpoints.
+- **Large fan-outs (>4 files/modules)** or **multi-day builds**: Use `run_workflow` (schema-checked Python fan-out) or `/teamwork`.
 
 ---
 
@@ -28,21 +27,29 @@ A reusable, team-maintained framework for building projects and custom agents co
 
 ```text
 .
-├── AGENTS.md                                      # Rules for agents working inside this framework repo
-├── ANTIGRAVITY_ECOSYSTEM_GUIDE.md                 # Full guide to App, IDE, CLI, and agent features
-├── TOKEN_EFFICIENCY_GUIDE.md                      # $50/mo playbook: model tiering, skills, subagents
-├── CONTRIBUTING.md                                # How team members add/improve skills, rules, and plugins
+├── AGENTS.md                                      # Rules for contributors editing this framework repo
+├── ANTIGRAVITY_ECOSYSTEM_GUIDE.md                 # Guide to App, IDE, CLI, Orchestrator, and multi-agent modes
+├── TOKEN_EFFICIENCY_GUIDE.md                      # $50/mo playbook: Orchestrator vs subagents, context & checkpoints
+├── CONTRIBUTING.md                                # How team members add/improve agents, skills, and rules
 ├── .agents/
-│   ├── rules/AGENTS.md                            # Shared team engineering & token-efficiency rules
+│   ├── agents/                                    # Saved custom subagents (auto-discovered in App, IDE, and CLI)
+│   │   ├── explorer.md                            # Read-only codebase scout (flash, sandbox, codebase-explorer)
+│   │   ├── frontend-builder.md                    # Scoped UI/state builder (inherit, frontend-dev)
+│   │   ├── backend-builder.md                     # Scoped API/DB/auth builder (inherit, backend-dev)
+│   │   └── verifier.md                            # Independent diff & test auditor (flash, no file-edit tools)
+│   ├── rules/
+│   │   └── AGENTS.md                              # Shared team engineering, verification & multi-agent rules
 │   └── skills/
 │       ├── codebase-explorer/SKILL.md             # Skill: fast read-only search & file mapping
 │       ├── frontend-dev/SKILL.md                  # Skill: token-efficient frontend development
 │       ├── backend-dev/SKILL.md                   # Skill: token-efficient backend development
-│       ├── token-efficient-agents/SKILL.md        # Skill: model tiering & subagent delegation
-│       ├── neon-orchestrator/SKILL.md             # Skill: Neon lead orchestrator + tiered skill-loaded subagents
-│       ├── project-bootstrap/SKILL.md             # Skill: bootstrap any repo with this framework
-│       └── framework-contribute/SKILL.md          # Skill: add/update framework skills, rules, hooks
-└── template/                                      # Copy-paste starter kit for new projects
+│       ├── token-efficient-agents/SKILL.md        # Skill: model selection, workspace isolation & verification
+│       ├── neon-orchestrator/                     # Skill: greenfield + parallel process & coordination layer
+│       │   ├── SKILL.md
+│       │   └── references/subagent-templates.md
+│       ├── project-bootstrap/SKILL.md             # Skill: bootstrap greenfield or existing repos
+│       └── framework-contribute/SKILL.md          # Skill: add/update framework agents, skills, rules, hooks
+└── template/                                      # Starter kit copied into target projects by project-bootstrap
     ├── AGENTS.md
     └── .agents/
         ├── hooks.json
@@ -55,7 +62,7 @@ A reusable, team-maintained framework for building projects and custom agents co
 ## Using This Framework in Another Project
 
 ### Option 1: Install Directly into One Project from GitHub (Recommended)
-Run from the root of `<your-project>` to install `.agents/` for **that project only** (without modifying global config):
+Run from the root of `<your-project>` to install `.agents/` (`agents/`, `rules/`, `skills/`) for **that project only**:
 
 **PowerShell (Windows):**
 ```powershell
@@ -72,13 +79,14 @@ cp -r _tmp_agy/.agents .agents && \
 [ -f AGENTS.md ] || cp _tmp_agy/template/AGENTS.md AGENTS.md && \
 rm -rf _tmp_agy
 ```
+*(After copying, fill in `<your-project>/AGENTS.md` with your real build/lint/test commands—or ask the agent to run `project-bootstrap`.)*
 
 ### Option 2: Link via Git Submodule (Stay Synced with `main` Per Project)
 1. Add this repo as a submodule:
    ```bash
    git submodule add https://github.com/Matchewmau/agy-supost.git .agents/vendor/agy-supost
    ```
-2. Register the skills in `<your-project>/.agents/skills.json`:
+2. Copy or symlink `.agents/agents/` and `.agents/rules/`, and register skills in `<your-project>/.agents/skills.json`:
    ```json
    {
      "skills": [
@@ -92,14 +100,14 @@ rm -rf _tmp_agy
    ```
 
 ### Option 3: Install Globally (Applies to All Projects)
-Copy `.agents/rules/` and `.agents/skills/` into `~/.gemini/config/`.
+Copy `.agents/agents/`, `.agents/rules/`, and `.agents/skills/` into `~/.gemini/config/`.
 
-### Option 4: Bootstrap with the Agent
-Open this repo (or copy the `project-bootstrap` skill) and ask the agent:
-> *"Use the `project-bootstrap` skill to set up Antigravity customizations for `<path-to-project>`."*
+### Option 4: Bootstrap a Greenfield or Existing Project with the Agent
+Open this repo (or install `.agents/` first) and prompt:
+> *"Use the `project-bootstrap` skill to set up `<path-to-project>`."*
 
 ---
 
 ## Improving the Framework
 
-This framework is meant to evolve with the team. See [CONTRIBUTING.md](./CONTRIBUTING.md) for how to add new skills, refine team rules, or contribute lifecycle hooks and plugins.
+See [CONTRIBUTING.md](./CONTRIBUTING.md) (or use the `framework-contribute` skill) to add new custom subagents, refine team rules, or contribute skills and hooks.

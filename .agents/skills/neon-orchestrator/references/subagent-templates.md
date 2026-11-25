@@ -1,60 +1,121 @@
-# Subagent Templates & Handoff Schemas
+# Subagent Templates, Workflows & Persistent Project Files
 
-Use these templates with `define_subagent` and `invoke_subagent` when orchestrating from Neon.
-
----
-
-## 1. Specialist `define_subagent` Definitions
-
-### A. `explorer` (Tier 3: `flash_lite` / `flash`, Read-Only)
-- `EnableWriteTools: false`
-- **SystemPrompt**:
-  > You are a fast, read-only codebase explorer. Before searching, read and follow the `codebase-explorer` skill (`SKILL.md`). Search with targeted grep/find commands, read only minimal line ranges, and return a compact map: exact file paths, line ranges, key symbols/signatures, and relevant build/test commands. Never paste whole files.
-
-### B. `frontend-builder` (Tier 2/1: `flash` / `inherit` / `pro`, Write-Enabled)
-- `EnableWriteTools: true`
-- **SystemPrompt**:
-  > You are a focused frontend engineer. Before editing, read and follow the `frontend-dev` skill (`SKILL.md`). Only edit files explicitly assigned to you. Reuse existing components and styles. Run targeted lint/typecheck/tests on your changes before reporting back. Return a concise handoff: modified files, UI/state changes, and exact command outputs.
-
-### C. `backend-builder` (Tier 2/1: `flash` / `inherit` / `pro`, Write-Enabled)
-- `EnableWriteTools: true`
-- **SystemPrompt**:
-  > You are a focused backend engineer. Before editing, read and follow the `backend-dev` skill (`SKILL.md`). Only edit files explicitly assigned to you. Validate inputs, handle errors explicitly, and never hardcode secrets. Run targeted unit/integration tests before reporting back. Return a concise handoff: modified files, API/schema changes, and exact test results.
-
-### D. `qa-verifier` (Tier 2/3: `flash`, Write-Enabled for test runs only)
-- `EnableWriteTools: true`
-- **SystemPrompt**:
-  > You are a verification specialist. Do not edit production code. Run the specified lint, typecheck, build, and test commands, and return only: pass/fail status, failing test names, and the exact minimal stack trace or error lines needed to fix them.
+Reference templates for `neon-orchestrator`.
 
 ---
 
-## 2. Standard Task Prompt Template (`invoke_subagent`)
+## 1. Invoking Saved Custom Subagents (Preferred)
 
-Keep prompts short, structured, and self-contained:
+When `.agents/agents/` is present in the workspace (or `~/.gemini/config/agents/`), you do **not** need `define_subagent`. Call `invoke_subagent` directly with the saved agent's `name` (`explorer`, `frontend-builder`, `backend-builder`, `verifier`):
+
+- **Model selection happens at invocation** (`model`: `"inherit"`, `"flash"`, or `"pro"`) or defaults to the `.agents/agents/<name>.md` frontmatter.
+- **Workspace isolation** (`workspace`):
+  - `"inherit"`: Read-only `explorer`, `verifier`, or a **single** sequential builder.
+  - `"share"` or `"branch"`: **Required** whenever 2+ builders run in parallel so lockfiles, build artifacts, and test runs stay isolated.
+
+### Task Brief Template (`invoke_subagent` `prompt`)
+Subagents start with an empty conversation history—your prompt is all they see:
 
 ```text
-Skill to load: <skill-name>
-Assigned files: <file1>, <file2>
-Context map: <2-4 bullet summary from explorer with line numbers>
-Goal: <clear, single-sentence objective>
+Assigned files (strict boundary): <path1>, <path2>
+Context map:
+- <path:line-range — symbol/interface notes from explorer>
+Goal: <single-sentence objective>
 Acceptance criteria:
 - <criterion 1>
 - <criterion 2>
-Verification command: <exact test/lint command>
-Handoff format: Return only (1) modified files, (2) summary of changes (<=5 bullets), (3) exact verification output.
+Verification command: <exact lint/typecheck/test command from AGENTS.md>
+Handoff: Return (1) modified files, (2) <=5 bullet summary, (3) exact command outputs.
 ```
 
 ---
 
-## 3. Escalation Handoff Template (Tier 2 -> Tier 1 / Neon)
+## 2. Fallback Transient `define_subagent` Schema (Only When `.agents/agents/` Is Absent)
 
-When a lower-tier model hits the 2-strike circuit breaker:
+If orchestrating in a workspace without `.agents/agents/*.md`, note these parameter rules:
+- `define_subagent` sets capability flags (`name`, `description`, `system_prompt`, `enable_write_tools`, `enable_mcp_tools`, `enable_subagent_tools` — PascalCase in App/IDE tool declarations, `snake_case` in CLI). It has **no `model` parameter**.
+- `enable_write_tools` gates **both** file edits and `run_command` together (all-or-nothing). Unlike `.agents/agents/verifier.md`, a transient subagent cannot allow shell test runs while blocking file edits except via prompt instructions.
+
+---
+
+## 3. Escalation Handoff Template (2-Strike Rule)
+
+When a subagent fails twice or hits an interface blocker:
 
 ```text
-Escalated from: <lower-tier subagent>
-Skill to load: <skill-name>
+Escalated from: <agent-name> (<prior model>)
 Files involved: <paths + line ranges>
 What was tried: <1-2 bullets>
-Exact error: <minimal error snippet>
-Goal: Resolve the root cause cleanly and verify with `<command>`.
+Observed error: <exact minimal error / failing test output>
+Goal: Fix the root cause cleanly and verify with `<command>`.
+```
+
+---
+
+## 4. `run_workflow` Template (For Fan-Outs > 3–4 Slices)
+
+Use `run_workflow` when fanning out across many files/modules and enforcing a JSON result schema (`flash_lite` is valid here):
+
+```python
+RESULT_SCHEMA = {
+    "type": "object",
+    "properties": {
+        "files_modified": {"type": "array", "items": {"type": "string"}},
+        "summary": {"type": "string"},
+        "tests_passed": {"type": "boolean"},
+    },
+    "required": ["files_modified", "summary", "tests_passed"],
+}
+
+slices = [
+    {"role": "Slice A", "files": "src/a.ts", "goal": "..."},
+    {"role": "Slice B", "files": "src/b.ts", "goal": "..."},
+]
+
+phase("Parallel implementation")
+results = await parallel(
+    slices,
+    lambda s: agent(
+        f"Follow backend-dev skill. Edit ONLY {s['files']}. Goal: {s['goal']}. Run targeted tests.",
+        schema=RESULT_SCHEMA,
+        role=s["role"],
+        type_name="backend-builder",
+        workspace="branch",
+        model="inherit",
+    ),
+)
+print(results)
+```
+
+---
+
+## 5. Persistent Project Files (For Greenfield & Multi-Session Builds)
+
+Keep sessions lean ("one slice = one fresh chat") **without** losing project memory by maintaining `PLAN.md` and `TASKS.md` in the project root:
+
+### `PLAN.md` (Architecture & Milestones)
+```markdown
+# <Project Name> — Implementation Plan
+
+## Stack & Commands
+- Stack: <runtime, framework, DB, test runner>
+- Commands: see `AGENTS.md`
+
+## Architecture & Shared Contracts
+- <Directory layout and module boundaries>
+- <Core types / API schemas / DB tables agreed upfront>
+
+## Milestones
+1. M0 — Foundation skeleton, shared interfaces, test harness
+2. M1 — <Core vertical slice>
+3. M2 — <Secondary features & hardening>
+```
+
+### `TASKS.md` (Session-to-Session Checklist)
+```markdown
+# Task Tracker
+
+- [x] M0.1: Bootstrap repo, toolchain, `AGENTS.md`, initial skeleton (`commit <sha>`)
+- [ ] M1.1: `[backend-builder]` Implement auth & user schema (`src/db/`, `src/auth/`) — Verify: `npm test -- auth`
+- [ ] M1.2: `[frontend-builder]` Build login/session UI (`src/features/auth/`) — Verify: `npm test -- Login`
 ```

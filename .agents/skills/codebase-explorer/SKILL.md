@@ -2,7 +2,7 @@
 name: codebase-explorer
 description: >-
   Use this skill when searching a codebase, mapping architecture, or locating
-  symbols/files before making edits, especially in a read-only flash/flash_lite subagent.
+  symbols/files before making edits, especially in the read-only explorer custom agent or a flash subagent.
 ---
 
 # Codebase Explorer (Token-Efficient)

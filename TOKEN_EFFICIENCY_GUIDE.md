@@ -4,37 +4,39 @@ Practical guidelines for staying within a **$50/month** budget **without sacrifi
 
 ---
 
-## 1. Match Model & Effort to Task Risk (Quality First)
-Use the full range of available models (e.g., **Neon**, **Carbon**, **Argon**, **Hydrogen**, `pro`, `flash`) and tune **reasoning effort** to match the complexity and risk of the work:
+## 1. Pick the Right Execution Mode & Model
 
-| Work Type | Recommended Model & Effort | Why |
+Antigravity separates **session models** (selected via `/model` or `agy --model`) from **subagent `model` tiers** (`inherit`, `flash`, `pro`):
+
+| Work Type | Recommended Mode / Model | Why |
 | :--- | :--- | :--- |
-| **Architecture, Security, DB Migrations, Hard Bugs** | High-capability (`pro`, Neon/Carbon/Argon) at **High** effort | Minimizes subtle bugs, security flaws, and costly rework loops |
-| **Feature Implementation (Frontend & Backend)** | Balanced (`inherit` / Hydrogen / Carbon) at **Medium** effort | Strong code quality and conventions at reasonable cost |
-| **Codebase Search & File Mapping** | Fast (`flash` / `flash_lite`) at **Low** effort | Read-only exploration doesn't need heavy reasoning |
-| **Routine Boilerplate & Formatting** | Fast (`flash`) at **Low–Medium** effort | Low-risk edits with clear patterns |
+| **Single-thread feature or bug fix** | **Built-in `Orchestrator` model** (`Orchestrator (Neon)` on Pro/Ultra; `Carbon + Hydrogen` on Enterprise) | Zero setup: planner (Neon/Carbon) plans & reviews while fast executor (Hydrogen) runs searches, edits, and tests |
+| **Architecture, Security, DB Migrations, Hard Bugs** | Standalone **Neon / Carbon / Argon** (High effort), or subagent `model: "pro"` / `"inherit"` | Minimizes subtle bugs, security flaws, and costly rework loops |
+| **Parallel Independent Feature Slices (2–4)** | **`neon-orchestrator` + saved `.agents/agents/`** (`inherit` / `pro` builders in `workspace: "share"` or `"branch"`) | Parallel progress with isolated workspaces, per-agent skills, and clean context |
+| **Codebase Scouting & Independent Verification** | Saved **`explorer`** / **`verifier`** custom agents (`model: "flash"`) | Read-only scouting and diff/test auditing don't need heavy reasoning |
+| **Large Per-File Fan-Outs (>4 items)** | **`run_workflow`** (`model="flash_lite"` or `"flash"` with JSON `schema`) | Enforces structured results across many items in one script |
 
-> **Rule of Thumb**: Never force a weak model onto complex logic, auth, state management, or data-integrity code. Escalate model/effort whenever errors or ambiguity appear.
-
----
-
-## 2. Save Tokens Through Clean Context (Not Weak Models)
-- **Keep `AGENTS.md` lean**: Always-on rules load on every turn (20,000-token aggregate budget). Keep `AGENTS.md` under ~50–80 lines.
-- **Use Skills (`.agents/skills/`)**: Progressive disclosure keeps domain instructions (`frontend-dev`, `backend-dev`, `codebase-explorer`, `token-efficient-agents`) out of context until needed.
-- **One task = one fresh conversation**: Every turn re-sends the full history. Start a new chat per feature/bug, or use `/compact` on long threads.
-- **Use IDE Tab & `Ctrl+I` for small edits**: Autocomplete and inline commands avoid full multi-turn agent overhead for localized changes.
+> **Rule of Thumb**: Never force `flash` onto complex logic, auth, state management, or data-integrity code. If a subagent fails twice, escalate immediately (2-strike rule).
 
 ---
 
-## 3. Isolate Context with Focused Subagents (`define_subagent`)
-Subagents run in their own context window, preventing intermediate file reads and test logs from bloating the main session. For a full Neon-led delegation protocol (4-tier model routing, skill pairing, and 2-strike escalation), see [neon-orchestrator/SKILL.md](./.agents/skills/neon-orchestrator/SKILL.md).
-
-1. **Explorer Subagent** (`flash` / `flash_lite`, `EnableWriteTools: false`): Uses `codebase-explorer` to return exact file paths, line ranges, and key symbols.
-2. **Frontend Subagent** (`inherit` or `pro` for complex state/UI, `EnableWriteTools: true`): Uses `frontend-dev`, edits UI files, and runs targeted UI checks + build.
-3. **Backend Subagent** (`inherit` or `pro` for API/DB/auth, `EnableWriteTools: true`): Uses `backend-dev`, edits server/DB files, and runs targeted backend tests.
+## 2. Save Tokens Through Clean Context & Persistent State
+- **Keep `AGENTS.md` lean**: Always-on rules load every turn (20,000-token shared budget). Keep `AGENTS.md` under ~50–80 lines.
+- **Use Skills (`.agents/skills/`)**: Progressive disclosure keeps domain instructions (`frontend-dev`, `backend-dev`, `neon-orchestrator`) out of context until needed.
+- **One slice = one fresh chat + `PLAN.md` / `TASKS.md`**: Every turn re-sends conversation history. Keep multi-session architecture in `PLAN.md` and slice checklists in `TASKS.md` so each fresh chat starts small without losing project memory (or run `/compact` on long threads).
+- **Use IDE Tab & `Ctrl+I` for small edits**: Inline commands avoid full multi-turn agent overhead for localized changes.
 
 ---
 
-## 4. Verification Keeps Errors (and Rework) Minimal
-- Run targeted tests while iterating (`pytest tests/test_auth.py`), then run the full relevant lint/typecheck/test suite before finishing.
-- Review diffs carefully—catching a bug in one verification pass is far cheaper than debugging it across 10 follow-up turns.
+## 3. Use Saved Custom Subagents (`.agents/agents/`)
+Instead of redefining transient subagents with `define_subagent` (`enable_write_tools`) every session, invoke the saved workspace agents in `.agents/agents/`:
+1. **`explorer`** (`model: flash`, `tools: [read_file, run_command]`): Uses `codebase-explorer` to return exact file paths, line ranges, and symbols.
+2. **`frontend-builder`** (`model: inherit`, write-enabled): Uses `frontend-dev`; run with `workspace: "share"` or `"branch"` when parallelized.
+3. **`backend-builder`** (`model: inherit`, write-enabled): Uses `backend-dev`; run with `workspace: "share"` or `"branch"` when parallelized.
+4. **`verifier`** (`model: flash`, `tools: [read_file, run_command, manage_task]`): Audits real `git diff` and runs tests independently—cannot edit files.
+
+---
+
+## 4. Independent Verification & Git Checkpoints
+- Never rely solely on a builder subagent's own summary: inspect `git diff` and rerun lint/typecheck/tests in the lead session or via `verifier`.
+- Commit each verified slice (`git commit`) so regressions can be rolled back in one command instead of debugged across 10 turns.

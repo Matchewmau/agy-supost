@@ -1,26 +1,33 @@
 ---
 name: project-bootstrap
 description: >-
-  Use this skill when the user asks to set up, initialize, or bootstrap a new
-  or existing project with the SUpost Antigravity Team Framework.
+  Use this skill when setting up, initializing, or bootstrapping either a
+  brand-new (greenfield) project or an existing repository with the SUpost
+  Antigravity Team Framework.
 ---
 
-# Project Bootstrap
+# Project Bootstrap (Greenfield & Existing Repos)
 
-Set up any target repository with Antigravity rules, skills, and hook templates tailored to its tech stack.
+Equip any new or existing project with working build/lint/test commands, tailored `AGENTS.md` rules, and the framework's `.agents/` custom agents and skills.
 
 ## Steps
 
-1. **Inspect the Target Project**:
-   - Check the root directory of the target project for language/framework markers (e.g., `package.json`, `pyproject.toml`, `Cargo.toml`, `go.mod`, `.git`).
-   - Identify the actual build, lint, and test commands used by the project.
-2. **Install Project Customizations**:
-   - Copy `template/AGENTS.md` from the framework into `<target-project>/AGENTS.md` (if one does not already exist; otherwise merge sections carefully).
-   - Copy `template/.agents/` into `<target-project>/.agents/`.
-   - Optionally copy `.agents/rules/` and `.agents/skills/` into `<target-project>/.agents/` if the team wants the shared rules and skills bundled in the repo.
-3. **Tailor `AGENTS.md`**:
-   - Fill in the project's tech stack, directory layout, and verified build/test/lint commands.
-   - Remove placeholder comments that no longer apply.
-4. **Verify**:
-   - Confirm `<target-project>/AGENTS.md` and `<target-project>/.agents/` exist and contain valid Markdown/JSON.
-   - Summarize the created files and remind the user they can open the project in Antigravity App, Antigravity IDE (`antigravity-ide`), or `agy`.
+### 1. Detect Mode: Greenfield vs. Existing Repo
+- **Existing Repo**: Inspect manifests (`package.json`, `pyproject.toml`, `Cargo.toml`, `go.mod`, `Makefile`, CI workflows) to find the exact install, build, lint, typecheck, and test commands.
+- **Brand-New / Empty Folder (Greenfield)**:
+  1. Confirm the target stack and package manager with the user (or read `PLAN.md` if already drafted via `/grill-me` or `/plan`).
+  2. Initialize Git (`git init`) if `.git` is missing, and create a sensible `.gitignore`.
+  3. Initialize the project manifest/toolchain (e.g., `npm init`, `uv init`, `cargo init`, `go mod init`) so build, lint, and test commands actually exist before agents start coding.
+
+### 2. Install Framework Customizations
+- Copy `template/AGENTS.md` into `<target-project>/AGENTS.md` (if `AGENTS.md` already exists, merge missing sections without clobbering project rules).
+- Copy `.agents/agents/`, `.agents/rules/`, and `.agents/skills/` into `<target-project>/.agents/` (plus `template/.agents/hooks.json` with `"enabled": false` if desired).
+
+### 3. Tailor `AGENTS.md` & Persistent Trackers
+- Replace **every** `<placeholder>` in `<target-project>/AGENTS.md` with verified stack details, directory boundaries, and exact install/build/lint/test commands.
+- For greenfield or multi-milestone projects, create `PLAN.md` (architecture, shared contracts, milestones) and `TASKS.md` (ordered slice checklist) at `<target-project>/` so progress persists across sessions.
+
+### 4. Verify & Baseline Checkpoint
+- Run at least one verification command (e.g., test runner or build/typecheck) to confirm the toolchain works.
+- Confirm `<target-project>/AGENTS.md` has zero `<...>` placeholders and all `.json` files in `.agents/` are valid JSON.
+- On a greenfield repo, recommend committing this baseline (`git add -A && git commit -m "chore: bootstrap project and agent config"`) before running `neon-orchestrator` on feature slices.

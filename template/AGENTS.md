@@ -17,5 +17,6 @@
 - `<Project-specific patterns, API boundaries, or naming rules>`
 
 ## Agent Guidelines
-- Read relevant files before editing and run the test/lint commands above after your final change.
-- Put multi-step workflows into `.agents/skills/<skill-name>/SKILL.md` rather than expanding this file.
+- Read relevant files before editing, verify `git diff`, and run the test/lint commands above after your final change.
+- Put multi-step workflows in `.agents/skills/<skill-name>/SKILL.md` and specialist subagents in `.agents/agents/<name>.md` rather than expanding this file.
+- For multi-slice or multi-session features, track architecture in `PLAN.md` and task slices in `TASKS.md`.
