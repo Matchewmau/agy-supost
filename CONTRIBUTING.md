@@ -8,8 +8,8 @@ Team members are encouraged to improve this framework whenever you discover a be
 
 | What you want to add | Where to put it | When it loads |
 | :--- | :--- | :--- |
-| **Team-wide coding/agent rules** | `.agents/plugins/supost-framework/rules/AGENTS.md` | Always on when plugin is active |
-| **Reusable step-by-step workflow** | `.agents/plugins/supost-framework/skills/<skill-name>/SKILL.md` | On demand (progressive disclosure) |
+| **Team-wide coding/agent rules** | `.agents/rules/AGENTS.md` | Always on in workspace |
+| **Reusable step-by-step workflow** | `.agents/skills/<skill-name>/SKILL.md` | On demand (progressive disclosure) |
 | **Project starter boilerplate** | `template/` | Copied into new projects |
 | **Ecosystem / usage docs** | `ANTIGRAVITY_ECOSYSTEM_GUIDE.md` or `README.md` | Reference documentation |
 
@@ -17,7 +17,7 @@ Team members are encouraged to improve this framework whenever you discover a be
 
 ## Adding a New Skill
 
-1. Create a folder under `.agents/plugins/supost-framework/skills/<skill-name>/` (lowercase, hyphenated).
+1. Create a folder under `.agents/skills/<skill-name>/` (lowercase, hyphenated).
 2. Add `SKILL.md` with required YAML frontmatter:
    ```markdown
    ---

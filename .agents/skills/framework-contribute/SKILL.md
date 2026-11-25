@@ -12,8 +12,8 @@ Guide team members through adding or improving reusable customizations in this r
 ## Steps
 
 1. **Classify the Change**:
-   - **Always-on rule** (short, universal constraint) -> `.agents/plugins/supost-framework/rules/AGENTS.md`
-   - **On-demand workflow** (multi-step procedure) -> `.agents/plugins/supost-framework/skills/<skill-name>/SKILL.md`
+   - **Always-on rule** (short, universal constraint) -> `.agents/rules/AGENTS.md`
+   - **On-demand workflow** (multi-step procedure) -> `.agents/skills/<skill-name>/SKILL.md`
    - **New-project boilerplate** -> `template/`
 2. **Author the Change**:
    - For skills: create `<skill-name>/SKILL.md` with lowercase hyphenated `name` and third-person `description` in YAML frontmatter. Move lengthy docs to `references/` and helper scripts to `scripts/`.

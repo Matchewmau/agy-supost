@@ -6,7 +6,7 @@ You are working inside the **SUpost Antigravity Team Framework** repository.
 This repository stores reusable Antigravity customizations (rules, skills, plugins, hooks, and project templates) shared across projects and team members.
 
 ## Rules for Editing This Repository
-1. **Keep Customizations Portable**: Never hardcode machine-specific paths, personal credentials, or project-only secrets inside `.agents/plugins/supost-framework/` or `template/`.
+1. **Keep Customizations Portable**: Never hardcode machine-specific paths, personal credentials, or project-only secrets inside `.agents/` or `template/`.
 2. **Respect Context Budgets**:
    - Keep `AGENTS.md` files concise and high-signal (each rule file is capped at 24,000 bytes; all always-on rules share a 20,000-token budget).
    - Use **skills** (`.agents/skills/<name>/SKILL.md`) for multi-step procedures and put bulky docs in `references/` so they load on demand via progressive disclosure.

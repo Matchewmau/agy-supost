@@ -1,6 +1,6 @@
 # SUpost Team Shared Rules
 
-These rules apply whenever the `supost-framework` plugin is enabled.
+These rules apply whenever `.agents/rules/AGENTS.md` is present in a workspace.
 
 ## Engineering & Code Integrity
 - **Quality First**: Never compromise correctness, security, or maintainability to save tokens. Use higher-capability models and effort for complex, security-sensitive, or architectural work.

@@ -17,7 +17,7 @@ Set up any target repository with Antigravity rules, skills, and hook templates 
 2. **Install Project Customizations**:
    - Copy `template/AGENTS.md` from the framework into `<target-project>/AGENTS.md` (if one does not already exist; otherwise merge sections carefully).
    - Copy `template/.agents/` into `<target-project>/.agents/`.
-   - Optionally copy `.agents/plugins/supost-framework/` into `<target-project>/.agents/plugins/supost-framework/` if the team wants the shared plugin bundled in the repo.
+   - Optionally copy `.agents/rules/` and `.agents/skills/` into `<target-project>/.agents/` if the team wants the shared rules and skills bundled in the repo.
 3. **Tailor `AGENTS.md`**:
    - Fill in the project's tech stack, directory layout, and verified build/test/lint commands.
    - Remove placeholder comments that no longer apply.
