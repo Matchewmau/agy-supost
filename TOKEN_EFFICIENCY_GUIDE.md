@@ -27,7 +27,8 @@ Use the full range of available models (e.g., **Neon**, **Carbon**, **Argon**, *
 ---
 
 ## 3. Isolate Context with Focused Subagents (`define_subagent`)
-Subagents run in their own context window, preventing intermediate file reads and test logs from bloating the main session:
+Subagents run in their own context window, preventing intermediate file reads and test logs from bloating the main session. For a full Neon-led delegation protocol (4-tier model routing, skill pairing, and 2-strike escalation), see [neon-orchestrator/SKILL.md](./.agents/plugins/supost-framework/skills/neon-orchestrator/SKILL.md).
+
 1. **Explorer Subagent** (`flash` / `flash_lite`, `EnableWriteTools: false`): Uses `codebase-explorer` to return exact file paths, line ranges, and key symbols.
 2. **Frontend Subagent** (`inherit` or `pro` for complex state/UI, `EnableWriteTools: true`): Uses `frontend-dev`, edits UI files, and runs targeted UI checks + build.
 3. **Backend Subagent** (`inherit` or `pro` for API/DB/auth, `EnableWriteTools: true`): Uses `backend-dev`, edits server/DB files, and runs targeted backend tests.
