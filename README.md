@@ -57,17 +57,49 @@ A reusable, team-maintained framework for building projects and custom agents co
 
 ## Using This Framework in Another Project
 
-### Option 1: Copy the Starter Template (Recommended for New Projects)
-1. Copy everything inside `template/` into the root of your target project.
-2. Edit `<your-project>/AGENTS.md` with your project's tech stack, build/test commands, and conventions.
-3. Open `<your-project>` in **Antigravity App**, **Antigravity IDE** (`antigravity-ide .`), or **Antigravity CLI** (`agy`). All three surfaces automatically discover `AGENTS.md` and `.agents/`.
+### Option 1: Install Directly into One Project from GitHub (Recommended)
+Run from the root of `<your-project>` to install `supost-framework` for **that project only** (without modifying global config):
 
-### Option 2: Share the Plugin Across Projects
-Copy `.agents/plugins/supost-framework/` into:
-- **A specific project**: `<your-project>/.agents/plugins/supost-framework/` (team-shared via Git).
-- **Your global config**: `~/.gemini/config/plugins/supost-framework/` (applies to all projects on your machine).
+**PowerShell (Windows):**
+```powershell
+git clone --depth 1 https://github.com/Matchewmau/agy-supost.git _tmp_agy
+New-Item -ItemType Directory -Force -Path .agents/plugins | Out-Null
+Copy-Item -Recurse -Force _tmp_agy/.agents/plugins/supost-framework .agents/plugins/supost-framework
+if (!(Test-Path AGENTS.md)) { Copy-Item _tmp_agy/template/AGENTS.md AGENTS.md }
+Remove-Item -Recurse -Force _tmp_agy
+```
 
-### Option 3: Bootstrap with the Agent
+**Bash (macOS / Linux):**
+```bash
+git clone --depth 1 https://github.com/Matchewmau/agy-supost.git _tmp_agy && \
+mkdir -p .agents/plugins && \
+cp -r _tmp_agy/.agents/plugins/supost-framework .agents/plugins/supost-framework && \
+[ -f AGENTS.md ] || cp _tmp_agy/template/AGENTS.md AGENTS.md && \
+rm -rf _tmp_agy
+```
+
+### Option 2: Link via Git Submodule (Stay Synced with `main` Per Project)
+1. Add this repo as a submodule:
+   ```bash
+   git submodule add https://github.com/Matchewmau/agy-supost.git .agents/vendor/agy-supost
+   ```
+2. Register the plugin in `<your-project>/.agents/plugins.json`:
+   ```json
+   {
+     "plugins": [
+       "./vendor/agy-supost/.agents/plugins/supost-framework"
+     ]
+   }
+   ```
+3. Pull updates anytime with:
+   ```bash
+   git submodule update --remote .agents/vendor/agy-supost
+   ```
+
+### Option 3: Install Globally (Applies to All Projects)
+Copy `.agents/plugins/supost-framework/` into `~/.gemini/config/plugins/supost-framework/`.
+
+### Option 4: Bootstrap with the Agent
 Open this repo (or copy the `project-bootstrap` skill) and ask the agent:
 > *"Use the `project-bootstrap` skill to set up Antigravity customizations for `<path-to-project>`."*
 
