@@ -23,6 +23,7 @@ Use the pre-configured agents in `.agents/agents/` directly via `invoke_subagent
 - **`frontend-builder`** (`model: inherit`, write-enabled): Paired with `frontend-dev`.
 - **`backend-builder`** (`model: inherit`, write-enabled): Paired with `backend-dev`.
 - **`verifier`** (`model: flash`, tools: `read_file`, `run_command`, `manage_task`): Audits `git diff` and runs tests with **no** file-edit tools.
+- **`doc-writer`** (`model: flash`, tools: `read_file`, `edit_file`, `write_file`, `run_command`): Runs `phase-handoff` to update `PROGRESS.md`, `TASKS.md`, and `AGENTS.md` cheaply after verification.
 
 *(If `.agents/agents/` is absent and you use transient `define_subagent`, pass `enable_write_tools: false/true`—note that `define_subagent` has no `model` parameter and `enable_write_tools` gates shell commands and file writes together.)*
 

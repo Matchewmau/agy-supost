@@ -6,7 +6,7 @@ Reference templates for `neon-orchestrator`.
 
 ## 1. Invoking Saved Custom Subagents (Preferred)
 
-When `.agents/agents/` is present in the workspace (or `~/.gemini/config/agents/`), you do **not** need `define_subagent`. Call `invoke_subagent` directly with the saved agent's `name` (`explorer`, `frontend-builder`, `backend-builder`, `verifier`):
+When `.agents/agents/` is present in the workspace (or `~/.gemini/config/agents/`), you do **not** need `define_subagent`. Call `invoke_subagent` directly with the saved agent's `name` (`explorer`, `frontend-builder`, `backend-builder`, `verifier`, `doc-writer`):
 
 - **Model selection happens at invocation** (`model`: `"inherit"`, `"flash"`, or `"pro"`) or defaults to the `.agents/agents/<name>.md` frontmatter.
 - **Workspace isolation** (`workspace`):
@@ -91,7 +91,7 @@ print(results)
 
 ## 5. Persistent Project Files (For Greenfield & Multi-Session Builds)
 
-Keep sessions lean ("one slice = one fresh chat") **without** losing project memory by maintaining `PLAN.md` and `TASKS.md` in the project root:
+Keep sessions lean ("one slice = one fresh chat") **without** losing project memory by maintaining `PLAN.md`, `TASKS.md`, and `PROGRESS.md` in the project root:
 
 ### `PLAN.md` (Architecture & Milestones)
 ```markdown
@@ -118,4 +118,24 @@ Keep sessions lean ("one slice = one fresh chat") **without** losing project mem
 - [x] M0.1: Bootstrap repo, toolchain, `AGENTS.md`, initial skeleton (`commit <sha>`)
 - [ ] M1.1: `[backend-builder]` Implement auth & user schema (`src/db/`, `src/auth/`) — Verify: `npm test -- auth`
 - [ ] M1.2: `[frontend-builder]` Build login/session UI (`src/features/auth/`) — Verify: `npm test -- Login`
+```
+
+### `PROGRESS.md` (Living Handoff — Updated Each Phase via `doc-writer` / `/phase-handoff`)
+```markdown
+# Build Progress & Session Handoff
+
+## Current Snapshot
+- **Branch**: `main` | **Last Verified Commit**: `<sha>`
+- **Health**: Build passing, `<N>` tests passing (`<test command>`)
+
+## Latest Phase Summary
+- Completed `<task IDs>`: <1-3 bullets on routes, components, or schemas added>
+- **Env / Config Changes**: <new env vars, migrations, or `None`>
+
+## Key Decisions & Caveats
+- <Important contract, constraint, or edge case the next session must preserve>
+
+## Next Up (Resume Here)
+- **Next Slice**: `M1.2` — Build login/session UI in `src/features/auth/`
+- **Verify With**: `npm test -- Login`
 ```

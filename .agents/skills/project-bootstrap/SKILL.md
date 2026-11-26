@@ -25,7 +25,7 @@ Equip any new or existing project with working build/lint/test commands, tailore
 
 ### 3. Tailor `AGENTS.md` & Persistent Trackers
 - Replace **every** `<placeholder>` in `<target-project>/AGENTS.md` with verified stack details, directory boundaries, and exact install/build/lint/test commands.
-- For greenfield or multi-milestone projects, create `PLAN.md` (architecture, shared contracts, milestones) and `TASKS.md` (ordered slice checklist) at `<target-project>/` so progress persists across sessions.
+- For greenfield or multi-milestone projects, create `PLAN.md` (architecture, shared contracts, milestones), `TASKS.md` (ordered slice checklist), and `PROGRESS.md` (current build snapshot & next step) at `<target-project>/` so progress persists across sessions.
 
 ### 4. Verify & Baseline Checkpoint
 - Run at least one verification command (e.g., test runner or build/typecheck) to confirm the toolchain works.

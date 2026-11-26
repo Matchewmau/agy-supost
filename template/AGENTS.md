@@ -19,4 +19,4 @@
 ## Agent Guidelines
 - Read relevant files before editing, verify `git diff`, and run the test/lint commands above after your final change.
 - Put multi-step workflows in `.agents/skills/<skill-name>/SKILL.md` and specialist subagents in `.agents/agents/<name>.md` rather than expanding this file.
-- For multi-slice or multi-session features, track architecture in `PLAN.md` and task slices in `TASKS.md`.
+- For multi-slice or multi-session features, track architecture in `PLAN.md`, task slices in `TASKS.md`, and post-phase handoffs in `PROGRESS.md` (use `/phase-handoff` or the `doc-writer` subagent).

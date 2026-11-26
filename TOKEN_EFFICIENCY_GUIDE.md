@@ -23,7 +23,7 @@ Antigravity separates **session models** (selected via `/model` or `agy --model`
 ## 2. Save Tokens Through Clean Context & Persistent State
 - **Keep `AGENTS.md` lean**: Always-on rules load every turn (20,000-token shared budget). Keep `AGENTS.md` under ~50–80 lines.
 - **Use Skills (`.agents/skills/`)**: Progressive disclosure keeps domain instructions (`frontend-dev`, `backend-dev`, `neon-orchestrator`) out of context until needed.
-- **One slice = one fresh chat + `PLAN.md` / `TASKS.md`**: Every turn re-sends conversation history. Keep multi-session architecture in `PLAN.md` and slice checklists in `TASKS.md` so each fresh chat starts small without losing project memory (or run `/compact` on long threads).
+- **One slice = one fresh chat + `PLAN.md` / `TASKS.md` / `PROGRESS.md`**: Every turn re-sends conversation history. Keep architecture in `PLAN.md`, slice checklists in `TASKS.md`, and rolling phase handoffs (<120 lines) in `PROGRESS.md` via `/phase-handoff` so each fresh chat starts small without re-exploring the codebase (or run `/compact` on long threads).
 - **Use IDE Tab & `Ctrl+I` for small edits**: Inline commands avoid full multi-turn agent overhead for localized changes.
 
 ---
@@ -34,6 +34,7 @@ Instead of redefining transient subagents with `define_subagent` (`enable_write_
 2. **`frontend-builder`** (`model: inherit`, write-enabled): Uses `frontend-dev`; run with `workspace: "share"` or `"branch"` when parallelized.
 3. **`backend-builder`** (`model: inherit`, write-enabled): Uses `backend-dev`; run with `workspace: "share"` or `"branch"` when parallelized.
 4. **`verifier`** (`model: flash`, `tools: [read_file, run_command, manage_task]`): Audits real `git diff` and runs tests independently—cannot edit files.
+5. **`doc-writer`** (`model: flash`, `tools: [read_file, edit_file, write_file, run_command]`): Runs `phase-handoff` to refresh `PROGRESS.md`, `TASKS.md`, and `AGENTS.md` cheaply after verification so your main session doesn't spend top-tier tokens writing docs.
 
 ---
 

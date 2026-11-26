@@ -11,14 +11,16 @@ A reusable, team-maintained framework of **custom subagents**, **skills**, **sha
 | If you want to... | Read this |
 | :--- | :--- |
 | **Learn how Antigravity works** (App, IDE, CLI, Orchestrator model, `/swarm`, `/teamwork`) | [ANTIGRAVITY_ECOSYSTEM_GUIDE.md](./ANTIGRAVITY_ECOSYSTEM_GUIDE.md) |
-| **Stay on budget without losing code quality** (model selection, context hygiene, `PLAN.md`/`TASKS.md`) | [TOKEN_EFFICIENCY_GUIDE.md](./TOKEN_EFFICIENCY_GUIDE.md) |
+| **Stay on budget without losing code quality** (model selection, context hygiene, `PLAN.md`/`TASKS.md`/`PROGRESS.md`) | [TOKEN_EFFICIENCY_GUIDE.md](./TOKEN_EFFICIENCY_GUIDE.md) |
 | **Coordinate greenfield builds or parallel slices** (saved agents, isolated workspaces, real verification) | [neon-orchestrator/SKILL.md](./.agents/skills/neon-orchestrator/SKILL.md) |
+| **Keep living build/handoff docs updated after every task or phase** (`PROGRESS.md`, `TASKS.md`, `doc-writer`) | [phase-handoff/SKILL.md](./.agents/skills/phase-handoff/SKILL.md) |
 | **Add or improve custom agents, skills, rules, or templates** | [CONTRIBUTING.md](./CONTRIBUTING.md) |
 
 ### Choosing How to Run Work
 - **Single-thread feature or bug fix**: Select the built-in **`Orchestrator` model** (`agy --model "Orchestrator (Neon)"` or `/model`) so Neon plans/reviews and Hydrogen executes automatically, and let the agent load `frontend-dev` / `backend-dev` skills.
 - **Starting a brand-new project from scratch**: Run `/grill-me` or `/plan`, then prompt *"Use `neon-orchestrator` and `project-bootstrap` to initialize this project"* — sets up `PLAN.md`, `TASKS.md`, verified `AGENTS.md` commands, and an initial skeleton commit before parallel slices begin.
-- **2–4 parallel feature slices**: Prompt *"Use `neon-orchestrator` to implement `<feature>`"* — scouts with `explorer` (`flash`), dispatches `frontend-builder` / `backend-builder` in isolated workspaces (`share` / `branch`), audits real `git diff` + tests with `verifier`, and creates Git checkpoints.
+- **2–4 parallel feature slices**: Prompt *"Use `neon-orchestrator` to implement `<feature>`"* — scouts with `explorer` (`flash`), dispatches `frontend-builder` / `backend-builder` in isolated workspaces (`share` / `branch`), audits real `git diff` + tests with `verifier`, updates `PROGRESS.md` + `TASKS.md` with `doc-writer` (`flash`), and creates Git checkpoints.
+- **Wrapping up any task or session**: Run **`/phase-handoff`** so the `doc-writer` subagent (`flash`) records what changed, caveats, and the exact next slice in `PROGRESS.md` + `TASKS.md` for instant pickup next session.
 - **Large fan-outs (>4 files/modules)** or **multi-day builds**: Use `run_workflow` (schema-checked Python fan-out) or `/teamwork`.
 
 ---
@@ -36,7 +38,8 @@ A reusable, team-maintained framework of **custom subagents**, **skills**, **sha
 │   │   ├── explorer.md                            # Read-only codebase scout (flash, sandbox, codebase-explorer)
 │   │   ├── frontend-builder.md                    # Scoped UI/state builder (inherit, frontend-dev)
 │   │   ├── backend-builder.md                     # Scoped API/DB/auth builder (inherit, backend-dev)
-│   │   └── verifier.md                            # Independent diff & test auditor (flash, no file-edit tools)
+│   │   ├── verifier.md                            # Independent diff & test auditor (flash, no file-edit tools)
+│   │   └── doc-writer.md                          # Low-cost handoff & docs updater (flash, phase-handoff)
 │   ├── rules/
 │   │   └── AGENTS.md                              # Shared team engineering, verification & multi-agent rules
 │   └── skills/
@@ -47,12 +50,13 @@ A reusable, team-maintained framework of **custom subagents**, **skills**, **sha
 │       ├── neon-orchestrator/                     # Skill: greenfield + parallel process & coordination layer
 │       │   ├── SKILL.md
 │       │   └── references/subagent-templates.md
+│       ├── phase-handoff/SKILL.md                 # Skill: update PROGRESS.md, TASKS.md & AGENTS.md after phases
 │       ├── project-bootstrap/SKILL.md             # Skill: bootstrap greenfield or existing repos
 │       └── framework-contribute/SKILL.md          # Skill: add/update framework agents, skills, rules, hooks
 └── template/                                      # Starter kit copied into target projects by project-bootstrap
     ├── AGENTS.md
     └── .agents/
-        ├── hooks.json
+        ├── hooks.json                             # Optional disabled PostToolUse + Stop phase-handoff reminder
         └── skills/
             └── example-workflow/SKILL.md
 ```

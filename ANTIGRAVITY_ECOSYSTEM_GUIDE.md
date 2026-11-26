@@ -87,7 +87,7 @@ Antigravity discovers customizations automatically from your project (`.agents/`
 | Feature | Location | Purpose |
 | :--- | :--- | :--- |
 | **Rules** | `AGENTS.md`, `GEMINI.md`, `.agents/rules/*.md` | Always-on coding standards, architecture constraints, and repo conventions. (Capped at 24,000 bytes/file; 20,000-token aggregate rules budget.) |
-| **Custom Agents** | `.agents/agents/<name>.md` | Saved specialist subagents (`explorer`, `frontend-builder`, `backend-builder`, `verifier`) with explicit `tools`, `model` (`inherit`/`flash`/`pro`), `skills`, and `commandExecutionPolicy`. Discovered in App, IDE, and `agy` (`/agents`). |
+| **Custom Agents** | `.agents/agents/<name>.md` | Saved specialist subagents (`explorer`, `frontend-builder`, `backend-builder`, `verifier`, `doc-writer`) with explicit `tools`, `model` (`inherit`/`flash`/`pro`), `skills`, and `commandExecutionPolicy`. Discovered in App, IDE, and `agy` (`/agents`). |
 | **Skills** | `.agents/skills/<name>/SKILL.md` | On-demand runbooks loaded via **progressive disclosure** (only `name` & `description` are in context until triggered). Can include `scripts/`, `references/`, `examples/`, and `resources/`. |
 | **Plugins** | `.agents/plugins/<name>/plugin.json` | Shareable bundles packaging `skills/`, `rules/AGENTS.md`, `hooks.json`, and `mcp_config.json` into one unit. |
 | **Lifecycle Hooks** | `.agents/hooks.json` | Run shell commands on `SessionStart`, `PreToolUse`, `PostToolUse`, `PreInvocation`, `PostInvocation`, and `Stop` (e.g., auto-linting, formatting, safety gates). |
@@ -129,8 +129,9 @@ Organize project workspaces like this so the **App**, **IDE**, and **CLI** all d
 ├── AGENTS.md                         # Project overview, conventions, verified build/test commands
 ├── PLAN.md                           # Architecture & milestones (for greenfield / multi-session builds)
 ├── TASKS.md                          # Slice checklist & Git checkpoints across sessions
+├── PROGRESS.md                       # Rolling <120-line build snapshot & next-step handoff (/phase-handoff)
 └── .agents/
-    ├── agents/                       # Saved custom subagents (explorer, frontend-builder, backend-builder, verifier)
+    ├── agents/                       # Saved custom subagents (explorer, frontend-builder, backend-builder, verifier, doc-writer)
     ├── rules/
     │   └── AGENTS.md                 # Shared team engineering & verification rules
     ├── skills/

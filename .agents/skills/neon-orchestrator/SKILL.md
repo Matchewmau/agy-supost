@@ -36,6 +36,7 @@ Subagents (`invoke_subagent` and `.agents/agents/*.md`) accept **only** `inherit
 | **`frontend-builder`** | `inherit` (override to `flash` only for low-risk boilerplate, or `pro`) | `share` or `branch` (parallel) / `inherit` (solo) | `read_file`, `edit_file`, `write_file`, `run_command`, `manage_task` | UI/state builder (`frontend-dev`) |
 | **`backend-builder`** | `inherit` (or `pro`) | `share` or `branch` (parallel) / `inherit` (solo) | `read_file`, `edit_file`, `write_file`, `run_command`, `manage_task` | API/DB/auth builder (`backend-dev`) |
 | **`verifier`** | `flash` | `inherit` (or target branch) | `read_file`, `run_command`, `manage_task` | Independent diff & test auditor (no file-write tools) |
+| **`doc-writer`** | `flash` | `inherit` | `read_file`, `edit_file`, `write_file`, `run_command` | Updates `PROGRESS.md`, `TASKS.md`, and `AGENTS.md` (`phase-handoff`) |
 
 > **Note on `inherit` with the built-in `Orchestrator` model**: `inherit` uses the parent session's model. If your main session is running on `Orchestrator (Neon)` rather than standalone `Neon`, verify what `inherit` resolves to in `/agents` before relying on it, or pass `model: "pro"` / `"flash"` explicitly.
 
@@ -47,13 +48,13 @@ Subagents (`invoke_subagent` and `.agents/agents/*.md`) accept **only** `inherit
 
 **Path A: Starting a New Project from Scratch (Greenfield)**
 Do **not** fan out parallel builders into an empty folder. Execute sequentially first:
-1. **Align & Spec**: Recommend `/grill-me` or `/plan` if requirements are open. Write **`PLAN.md`** (stack, architecture, milestones, acceptance criteria) and **`TASKS.md`** (ordered checklist of slices) at the repo root so progress persists across fresh chat sessions (templates in [subagent-templates.md](./references/subagent-templates.md)).
+1. **Align & Spec**: Recommend `/grill-me` or `/plan` if requirements are open. Write **`PLAN.md`** (stack, architecture, milestones, acceptance criteria), **`TASKS.md`** (ordered checklist of slices), and an initial **`PROGRESS.md`** at the repo root so progress persists across fresh chat sessions (templates in [subagent-templates.md](./references/subagent-templates.md)).
 2. **Bootstrap Repo & Toolchain**: Initialize Git (`git init`), scaffold the project manifest/toolchain, and run the **`project-bootstrap`** skill so `AGENTS.md` contains real, working install/build/lint/test commands and `.agents/` is installed.
 3. **Foundation Slice + First Checkpoint**: Have a single builder (or the lead session) create the directory skeleton, shared types/interfaces, DB/config baseline, and a passing smoke test. Commit this baseline (`git commit -m "chore: initial project skeleton"`) **before** any parallel work begins.
 
 **Path B: Working in an Existing Repo**
-1. Read `AGENTS.md` (plus `PLAN.md` / `TASKS.md` if continuing multi-session work). If `AGENTS.md` is missing or still has `<placeholder>` commands, run `project-bootstrap` first.
-2. Invoke the saved **`explorer`** subagent (`model: "flash"`, `workspace: "inherit"`) to return exact file paths, line ranges, symbols, and build/test commands.
+1. Read `AGENTS.md` first, plus `PROGRESS.md`, `TASKS.md`, and `PLAN.md` if present—`PROGRESS.md` gives you the latest build state, caveats, and next slice without re-scanning old work. If `AGENTS.md` is missing or still has `<placeholder>` commands, run `project-bootstrap` first.
+2. Invoke the saved **`explorer`** subagent (`model: "flash"`, `workspace: "inherit"`) to map only the files, line ranges, and symbols needed for the current task.
 
 ### Phase 1: Decompose & Isolate Workspaces
 1. Split work into independent slices with **non-overlapping file ownership** (update `TASKS.md` for multi-slice features).
@@ -67,11 +68,12 @@ Do **not** fan out parallel builders into an empty folder. Execute sequentially 
 - Use `send_message` to follow up with an idle subagent that already holds slice context instead of spawning a new one.
 - **2-Strike Escalation**: If a subagent fails the same check twice or hits cross-slice ambiguity, stop retrying at that level—escalate `flash` -> `inherit`/`pro`, or resolve directly in the lead session.
 
-### Phase 3: Independent Verification & Git Checkpoints
+### Phase 3: Independent Verification, Docs Sync & Git Checkpoints
 **Never mark a slice done based only on the builder's own summary:**
 1. Integrate changes from `share` / `branch` workspaces into the working branch.
 2. **Audit the real diff & rerun checks**: Either inspect `git status -s` + `git diff` and run the lint/typecheck/test commands directly in the lead session, or invoke the read-only **`verifier`** subagent (`model: "flash"`) to check `git diff` against acceptance criteria and execute the test suite.
-3. **Checkpoint**: Once verified, update `TASKS.md` and create a clean Git checkpoint commit per slice (when working in a multi-slice build) so any later regression can be rolled back cleanly.
+3. **Update Living Build Docs (`phase-handoff`)**: Invoke **`doc-writer`** (`model: "flash"`)—or follow `phase-handoff` directly—to refresh `PROGRESS.md` (what changed, new env vars/migrations, caveats, exact next step), check off `TASKS.md`, and sync `AGENTS.md` if commands/layout changed.
+4. **Checkpoint**: Create a clean Git checkpoint commit per verified slice/phase (including the updated `PROGRESS.md` and `TASKS.md`) so any later regression can be rolled back cleanly and the next session resumes immediately.
 
 ---
 
@@ -79,4 +81,4 @@ Do **not** fan out parallel builders into an empty folder. Execute sequentially 
 Confirm orchestration succeeded when:
 1. `git diff` has been independently reviewed (by the lead or `verifier`) with no out-of-scope edits or leftover placeholders.
 2. Target lint, typecheck, build, and test commands pass and observed outputs are reported.
-3. `TASKS.md` (for multi-slice/multi-session work) reflects current status so the next session can resume cleanly.
+3. `PROGRESS.md` and `TASKS.md` (plus `AGENTS.md` if commands changed) are updated so the next session can pick up with zero guesswork.

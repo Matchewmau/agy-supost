@@ -7,10 +7,20 @@
         "hooks": [
           {
             "type": "command",
-            "command": "echo Replace with your project lint command",
+            "command": "python -c \"import json; print(json.dumps({}))\"",
             "timeout": 15
           }
         ]
+      }
+    ]
+  },
+  "phase-handoff-reminder": {
+    "enabled": false,
+    "Stop": [
+      {
+        "type": "command",
+        "command": "python -c \"import json, os, subprocess, sys; d = json.load(sys.stdin); cwd = d.get('cwd') or '.'; p = os.path.join(cwd, 'PROGRESS.md'); r = subprocess.run(['git', '-C', cwd, 'status', '--porcelain'], capture_output=True, text=True); dirty = [l for l in r.stdout.splitlines() if l.strip() and not l.strip().endswith(('PROGRESS.md', 'TASKS.md', 'PLAN.md'))]; out = {'decision': 'continue', 'reason': 'Code changed while PROGRESS.md exists and was not updated. Run phase-handoff (or doc-writer) to sync PROGRESS.md and TASKS.md before finishing.'} if (not d.get('continuationActive') and d.get('terminationReason') == 'NO_TOOL_CALL' and os.path.exists(p) and dirty and 'PROGRESS.md' not in r.stdout) else {'decision': 'allow'}; print(json.dumps(out))\"",
+        "timeout": 10
       }
     ]
   }
