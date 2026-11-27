@@ -6,6 +6,22 @@ A reusable, team-maintained framework of **custom subagents**, **skills**, **sha
 
 ---
 
+## Start a project in an empty folder
+
+Open the folder in Antigravity, replace `<your project idea>` with what you want to build, and paste this prompt into the chat.
+
+```text
+Start a new project in this folder. Use project-bootstrap from https://github.com/Matchewmau/agy-supost.git to install all agents, skills, and rules here. Then use neon-orchestrator to set up the tooling, build the first working version, and verify it runs.
+
+Project: <your project idea>
+```
+
+### Roblox game with live Rojo sync
+
+```text
+Set up this folder as a Roblox game. Use project-bootstrap from https://github.com/Matchewmau/agy-supost.git to install all agents, skills, and rules here. Connect Rojo to Roblox Studio and verify live sync by checking that a local Luau edit appears in Studio. Then use neon-orchestrator to build the first playable version of <your game idea>.
+```
+
 ## Quick Onboarding (Which Doc to Read)
 
 | If you want to... | Read this |
