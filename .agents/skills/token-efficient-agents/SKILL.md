@@ -1,33 +1,15 @@
 ---
 name: token-efficient-agents
-description: >-
-  Use this skill when choosing between Antigravity's built-in Orchestrator model,
-  saved custom subagents, and dynamic workflows to minimize token spend while
-  keeping code quality and verification strict.
+description: Selects execution modes and model tiers for coding tasks with token, latency and verification constraints.
 ---
+# Budget by accepted change
 
-# Quality-First Agent & Subagent Efficiency
+Use the built-in Orchestrator for sequential work. Use saved builders for independent work with stable interfaces and separate workspaces. For a larger mechanical batch, use a structured workflow. See [Neon routing](../neon-orchestrator/SKILL.md) when coordinating a build.
 
-Optimize token spend through the right execution mode, clean context, and right-sized models—never by skipping verification or forcing weak models onto complex code.
+Saved agents accept `inherit`, `flash`, or `pro`. Confirm the resolved parent for inherited builders. Use flash for scouting, verification and mechanically checkable edits. Use inherit or pro for domain logic, ambiguous failures and sensitive changes. Reserve flash_lite for workflow workers.
 
-## 1. Session Models vs. Subagent `model` Tiers
-- **Single-Thread Sessions**: Use the built-in **`Orchestrator` model** (`agy --model "Orchestrator (Neon)"` or `/model` on Pro/Ultra/Enterprise) when working sequentially—Neon/Carbon plans and reviews while Hydrogen executes searches, edits, and tests automatically. Or pick standalone **Neon / Carbon / Argon** (High effort) for hard architecture/security work and **Hydrogen** (Medium effort) for standard tasks.
-- **Subagent `model` Values (`invoke_subagent` / `.agents/agents/*.md`)**: Only **`inherit`**, **`flash`**, and **`pro`** are valid across CLI, App, and IDE (`flash_lite` is only for `run_workflow` Python scripts):
-  - **`inherit` or `pro`**: Feature implementation, UI state, APIs, DB schemas, auth, and bug fixes.
-  - **`flash`**: Read-only exploration (`explorer`), independent diff/test verification (`verifier`), and low-risk mechanical boilerplate.
-  - **Escalate After 2 Failures**: Stop retrying on `flash` if a check fails twice; escalate to `inherit`/`pro` or the lead session.
+Pass paths, symbols and checks. Reuse the worker holding the relevant context. Return commands, outcomes and the decisive error excerpt. Escalate a repeated failure after two attempts.
 
-## 2. Prefer Saved Custom Agents Over Ad-Hoc `define_subagent`
-Use the pre-configured agents in `.agents/agents/` directly via `invoke_subagent`:
-- **`explorer`** (`model: flash`, tools: `read_file`, `run_command`): Read-only scout paired with `codebase-explorer`.
-- **`frontend-builder`** (`model: inherit`, write-enabled): Paired with `frontend-dev`.
-- **`backend-builder`** (`model: inherit`, write-enabled): Paired with `backend-dev`.
-- **`verifier`** (`model: flash`, tools: `read_file`, `run_command`, `manage_task`): Audits `git diff` and runs tests with **no** file-edit tools.
-- **`doc-writer`** (`model: flash`, tools: `read_file`, `edit_file`, `write_file`, `run_command`): Runs `phase-handoff` to update `PROGRESS.md`, `TASKS.md`, and `AGENTS.md` cheaply after verification.
+## Verification
 
-*(If `.agents/agents/` is absent and you use transient `define_subagent`, pass `enable_write_tools: false/true`—note that `define_subagent` has no `model` parameter and `enable_write_tools` gates shell commands and file writes together.)*
-
-## 3. Workspace Isolation & Real Verification
-- Pass file paths, line numbers, and acceptance criteria—never paste whole files into subagent prompts.
-- Set `workspace: "share"` or `"branch"` whenever 2+ builders run in parallel.
-- Verify real changes (`git diff` + actual lint/typecheck/test runs via the lead agent or `verifier`) before marking any slice complete.
+Compare tokens and elapsed time through accepted changes, including review, integration and retries. Track defects and failed checks alongside savings.

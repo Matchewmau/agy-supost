@@ -1,9 +1,8 @@
 ---
 name: phase-handoff
 description: >-
-  Use this skill at the end of a task, slice, or milestone (or via /phase-handoff)
-  to update PROGRESS.md, TASKS.md, and AGENTS.md so the next chat session or
-  teammate can pick up the build immediately with minimal token cost.
+  Records verified milestones, session handoffs and explicit /phase-handoff requests
+  in project trackers for the next developer.
 ---
 
 # Phase Handoff & Living Build Docs
@@ -11,11 +10,7 @@ description: >-
 Capture verified build progress, architectural decisions, and exact next steps in repository Markdown files so fresh chat sessions resume in seconds without re-exploring the codebase.
 
 ## When to Run
-- Automatically at the end of **Phase 3** in `neon-orchestrator` after verification passes.
-- Whenever finishing a feature, milestone, migration, or debugging session.
-- Explicitly when the user runs `/phase-handoff`.
-
-> **Token-Efficiency Tip**: When the main session runs on a high-tier model (Neon, Carbon, Argon), invoke the saved **`doc-writer`** custom subagent (`model: "flash"`, `workspace: "inherit"`) to perform this update cheaply.
+Batch verified slices when a milestone closes or another session needs durable state. Honor explicit handoff requests and repository tracking requirements. Use doc-writer for substantial tracker updates; the lead can record a short handoff directly.
 
 ## Steps
 

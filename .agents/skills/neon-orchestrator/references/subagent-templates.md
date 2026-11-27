@@ -19,13 +19,13 @@ Subagents start with an empty conversation history—your prompt is all they see
 ```text
 Assigned files (strict boundary): <path1>, <path2>
 Context map:
-- <path:line-range — symbol/interface notes from explorer>
+- <path:line-range — agreed contract or symbol notes>
 Goal: <single-sentence objective>
 Acceptance criteria:
 - <criterion 1>
 - <criterion 2>
 Verification command: <exact lint/typecheck/test command from AGENTS.md>
-Handoff: Return (1) modified files, (2) <=5 bullet summary, (3) exact command outputs.
+Handoff: Return (1) modified files, (2) <=5 bullet summary, (3) commands, outcomes and decisive failure excerpts.
 ```
 
 ---
@@ -81,7 +81,7 @@ results = await parallel(
         role=s["role"],
         type_name="backend-builder",
         workspace="branch",
-        model="inherit",
+        model="pro",
     ),
 )
 print(results)
@@ -91,7 +91,7 @@ print(results)
 
 ## 5. Persistent Project Files (For Greenfield & Multi-Session Builds)
 
-Keep sessions lean ("one slice = one fresh chat") **without** losing project memory by maintaining `PLAN.md`, `TASKS.md`, and `PROGRESS.md` in the project root:
+Group verified slices by milestone or session handoff **without** losing project memory by maintaining `PLAN.md`, `TASKS.md`, and `PROGRESS.md` in the project root:
 
 ### `PLAN.md` (Architecture & Milestones)
 ```markdown

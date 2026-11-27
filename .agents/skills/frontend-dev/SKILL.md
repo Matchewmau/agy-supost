@@ -1,24 +1,11 @@
 ---
 name: frontend-dev
-description: >-
-  Use this skill when building, editing, or debugging frontend UI components,
-  styling, client-side state, routing, or frontend tests.
+description: Guides implementation and verification of UI, accessibility, routing and client state changes.
 ---
+# Implement
 
-# Frontend Development (Token-Efficient)
+Start at supplied components and tests. Trace affected callers, hooks and types. Reuse design-system patterns and preserve accessible names, keyboard interaction and existing state behavior.
 
-Follow this workflow for UI, styling, state, and client-side tasks while minimizing token spend.
+## Verification
 
-## Steps
-
-1. **Locate Only Relevant Files**:
-   - Search for the target component, route, or style file first (`rg -n` / `grep`).
-   - Read only the relevant component and its direct types/hooks (avoid reading unrelated pages or `node_modules`).
-2. **Implement Cleanly**:
-   - Reuse existing design-system components, utilities, and state patterns in the repo.
-   - Keep components small, typed, and accessible; avoid duplicating styles or markup.
-3. **Verify with Targeted Checks**:
-   - Run the narrowest check first (e.g., single test file or typecheck/lint on changed files).
-   - Only run the full frontend build after all edits are complete.
-4. **Concise Handoff (if running as a subagent)**:
-   - Return only: modified file paths, props/state/route changes, and exact test/build output.
+Exercise changed interactions and relevant loading, empty and error states. Run focused tests while editing. The integration owner runs required final lint, typecheck, build and tests on the integrated revision.

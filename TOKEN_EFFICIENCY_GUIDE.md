@@ -23,7 +23,7 @@ Antigravity separates **session models** (selected via `/model` or `agy --model`
 ## 2. Save Tokens Through Clean Context & Persistent State
 - **Keep `AGENTS.md` lean**: Always-on rules load every turn (20,000-token shared budget). Keep `AGENTS.md` under ~50–80 lines.
 - **Use Skills (`.agents/skills/`)**: Progressive disclosure keeps domain instructions (`frontend-dev`, `backend-dev`, `neon-orchestrator`) out of context until needed.
-- **One slice = one fresh chat + `PLAN.md` / `TASKS.md` / `PROGRESS.md`**: Every turn re-sends conversation history. Keep architecture in `PLAN.md`, slice checklists in `TASKS.md`, and rolling phase handoffs (<120 lines) in `PROGRESS.md` via `/phase-handoff` so each fresh chat starts small without re-exploring the codebase (or run `/compact` on long threads).
+- **Reuse context for follow-ups.** Keep the worker that already knows the slice. Record verified milestones in project trackers when another session needs them.
 - **Use IDE Tab & `Ctrl+I` for small edits**: Inline commands avoid full multi-turn agent overhead for localized changes.
 
 ---
